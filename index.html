@@ -50,20 +50,7 @@
     object-fit: cover;
     -webkit-user-drag: none;
     user-select: none;
-  }
-
-  /* invisible hitbox over the "Contact" button baked into the SRP screenshot — opens the sheet */
-  .contact-trigger {
-    position: absolute;
-    left: calc(71.5% - 2px);
-    top: calc(64.8% + 6px);
-    width: 26.5%;
-    height: 4.6%;
-    border: none;
-    background: transparent;
     cursor: pointer;
-    padding: 0;
-    z-index: 5;
   }
 
   /* dark scrim */
@@ -526,8 +513,7 @@
 
   <div class="phone-frame">
     <div class="screen">
-      <img class="bg" src="assets/srp.png" alt="City SRP background">
-      <button class="contact-trigger" id="contactTrigger" aria-label="Open confirm interest sheet"></button>
+      <img class="bg" id="bg" src="assets/srp.png" alt="City SRP background">
 
       <div class="scrim" id="scrim">
         <div class="bottomsheet" id="bottomsheet">
@@ -701,7 +687,7 @@
 <script>
   const scrim = document.getElementById('scrim');
   const bottomsheet = document.getElementById('bottomsheet');
-  const contactTrigger = document.getElementById('contactTrigger');
+  const bg = document.getElementById('bg');
   const closeBtns = document.querySelectorAll('[data-close]');
   const viewB1 = document.getElementById('viewB1');
   const viewB2 = document.getElementById('viewB2');
@@ -763,7 +749,7 @@
     });
   }
 
-  contactTrigger.addEventListener('click', openSheet);
+  bg.addEventListener('click', openSheet);
   closeBtns.forEach((btn) => btn.addEventListener('click', closeSheet));
   scrim.addEventListener('click', (e) => {
     if (e.target === scrim) closeSheet();
