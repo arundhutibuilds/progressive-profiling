@@ -13,7 +13,6 @@
     --sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
     --overlay-duration: 260ms;
     --brand: #4A16D9;
-    --top-gap: 40px;
   }
 
   * { box-sizing: border-box; }
@@ -29,18 +28,10 @@
     overflow: hidden;
   }
 
-  /* empty space at the top so the page doesn't load flush under the browser's search bar */
-  body {
-    padding-top: var(--top-gap);
-    display: flex;
-    flex-direction: column;
-  }
-
-  /* fills the rest of the viewport below the top gap, no fixed size or bounding chrome */
+  /* fills the actual device viewport exactly, no fixed size or bounding chrome */
   .phone-frame {
     width: 100vw;
-    flex: 1;
-    min-height: 0;
+    height: 100%;
     overflow: hidden;
     position: relative;
   }
