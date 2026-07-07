@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRF — City Confirmation Nudge</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500&display=swap">
+<style>
+  :root {
+    --sheet-duration: 340ms;
+    --sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    --overlay-duration: 260ms;
+    --brand: #4A16D9;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    background: #ece9e4;
+    font-family: "Google Sans Flex", sans-serif;
+  }
+
+  .page-heading {
+    font-size: 13px;
+    color: #8a8a8a;
+    letter-spacing: 0.2px;
+  }
+
+  /* Black border frame indicating the mobile viewport, 360x800 screen */
+  .phone-frame {
+    width: 360px;
+    height: 800px;
+    border: 4px solid #000;
+    border-radius: 18px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+
+  .screen {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+  }
+
+  .screen > .bg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  /* invisible hitbox over the "Contact" button baked into the SRP screenshot — opens the sheet */
+  .contact-trigger {
+    position: absolute;
+    left: calc(71.5% - 2px);
+    top: calc(64.8% + 2px);
+    width: 26.5%;
+    height: 4.6%;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    z-index: 5;
+  }
+
+  /* dark scrim */
+  .scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    transition: opacity var(--overlay-duration) ease-out;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .scrim.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* bottomsheet */
+  .bottomsheet {
+    width: 100%;
+    background: #FFFFFF;
+    border-radius: 24px 24px 0 0;
+    overflow: hidden;
+    transform: translateY(100%);
+    transition: transform var(--sheet-duration) var(--sheet-ease), height 380ms var(--sheet-ease);
+    will-change: transform, height;
+  }
+  .scrim.open .bottomsheet { transform: translateY(0); }
+
+  .sheet-view { padding: 16px; }
+  .sheet-view.is-hidden { display: none; }
+
+  .sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .sheet-title {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+    color: #0F0E0D;
+  }
+
+  .close-btn {
+    width: 32px;
+    height: 32px;
+    padding: 4px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+  }
+  .close-btn:hover { background: rgba(0,0,0,0.05); }
+
+  .property-card {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    background: #FAF9F5;
+    border: 1px solid #EDEBDF;
+    border-radius: 16px;
+    align-items: stretch;
+  }
+
+  .property-thumb {
+    flex: 0 0 53px;
+    width: 53px;
+    border-radius: 8px;
+    border: 1px solid #EDEBDF;
+    background: linear-gradient(135deg, #EFEDE4, #E2DFD2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .property-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    justify-content: center;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .property-name {
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+    color: #222222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .divider {
+    height: 1px;
+    background: #EDEBDF;
+    width: 100%;
+  }
+
+  .price-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #656565;
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  .price-row .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #656565;
+    flex: none;
+  }
+
+  .price-row .location { overflow: hidden; text-overflow: ellipsis; }
+
+  .question {
+    margin-top: 16px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #666666;
+  }
+  .question .bold {
+    font-weight: 500;
+    color: #0F0E0D;
+  }
+
+  .button-row {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn {
+    flex: 1 0 0;
+    min-width: 96px;
+    height: 48px;
+    border-radius: 12px;
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 120ms ease, opacity 120ms ease;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--brand);
+    color: var(--brand);
+  }
+  .btn-secondary:hover { background: rgba(74, 22, 217, 0.05); }
+
+  .btn-primary {
+    background: var(--brand);
+    border: none;
+    color: #FFFFFF;
+  }
+  .btn-primary:hover { opacity: 0.92; }
+
+  .btn-continue {
+    width: 100%;
+    margin-top: 24px;
+    background: #EEEEEE;
+    color: #666666;
+    border: none;
+    cursor: not-allowed;
+    transition: background 150ms ease, color 150ms ease, opacity 120ms ease;
+  }
+  .btn-continue.active {
+    background: var(--brand);
+    color: #FFFFFF;
+    cursor: pointer;
+  }
+  .btn-continue.active:hover { opacity: 0.92; }
+
+  .qc-section { margin-top: 24px; }
+
+  .qc-label {
+    font-size: 14px;
+    line-height: 20px;
+    color: #666666;
+    margin-bottom: 12px;
+  }
+
+  .radio-list { display: flex; flex-direction: column; }
+
+  .radio-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0;
+    border-bottom: 1px solid #EDEBDF;
+    font-size: 14px;
+    line-height: 20px;
+    color: #0F0E0D;
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .radio-row:last-child { border-bottom: none; }
+
+  .radio-control {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid #9E9E9E;
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 120ms ease;
+  }
+
+  .radio-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--brand);
+    transform: scale(0);
+    transition: transform 120ms ease;
+  }
+
+  .locality-question {
+    font-size: 14px;
+    line-height: 20px;
+    color: #444444;
+    margin-bottom: 16px;
+  }
+
+  .chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .chip {
+    padding: 12px;
+    border: 1px solid #EDEBDF;
+    border-radius: 12px;
+    background: none;
+    color: #0F0E0D;
+    font-size: 14px;
+    line-height: 20px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  }
+  .chip.selected {
+    background: #F6F1F8;
+    border-color: var(--brand);
+    color: var(--brand);
+  }
+
+  .radio-row.selected .radio-control {
+    border-color: var(--brand);
+  }
+  .radio-row.selected .radio-dot {
+    transform: scale(1);
+  }
+
+  /* B4 — phone login / lead capture */
+  .login-banner {
+    height: 79px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #EFE7FB 0%, #F6F1F8 50%, #FDECEA 100%);
+    opacity: 0.45;
+    margin: -16px -16px 0;
+  }
+
+  .login-logo-badge {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: #FFFFFF;
+    border: 1px solid #F5F5F5;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: -34px auto 0;
+    position: relative;
+  }
+
+  .login-heading {
+    margin-top: 16px;
+    font-family: Rubik, "Google Sans Flex", sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 500;
+    color: #222222;
+    text-align: center;
+  }
+
+  .phone-input-wrap {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 48px;
+    padding: 0 17px;
+    border: 1px solid #E1E2E8;
+    border-radius: 12px;
+    background: #FFFFFF;
+  }
+
+  .country-code {
+    font-family: Rubik, "Google Sans Flex", sans-serif;
+    font-size: 14px;
+    color: #222222;
+    flex: none;
+  }
+
+  .phone-input-divider {
+    width: 1px;
+    height: 20px;
+    background: #E1E2E8;
+    border-radius: 100px;
+    flex: none;
+  }
+
+  .phone-input {
+    border: none;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+    font-family: Rubik, "Google Sans Flex", sans-serif;
+    font-size: 14px;
+    color: #222222;
+    background: transparent;
+  }
+  .phone-input::placeholder { color: #767676; }
+
+  .btn-login-primary {
+    width: 100%;
+    margin-top: 16px;
+    background: #5E23DC;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    font-family: Rubik, "Google Sans Flex", sans-serif;
+  }
+  .btn-login-primary:hover { opacity: 0.92; }
+
+  .or-divider {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .or-divider .line {
+    flex: 1;
+    height: 1px;
+    background: #F2F3F8;
+  }
+  .or-divider span {
+    font-family: Rubik, "Google Sans Flex", sans-serif;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+    color: #767676;
+  }
+
+  .btn-whatsapp {
+    width: 100%;
+    margin-top: 16px;
+    background: transparent;
+    border: 1px solid #5E23DC;
+    color: #5E23DC;
+    border-radius: 8px;
+    font-family: Rubik, "Google Sans Flex", sans-serif;
+    gap: 8px;
+  }
+
+  /* feedback toast for Yes/No taps */
+  .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 28px;
+    transform: translate(-50%, 12px);
+    max-width: 300px;
+    background: #0F0E0D;
+    color: #fff;
+    font-size: 13px;
+    line-height: 18px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease, transform 200ms ease;
+    z-index: 30;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  .replay-btn {
+    border: 1px solid #c9c6bd;
+    background: #fff;
+    color: #333;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .replay-btn:hover { background: #f5f4f0; }
+
+  /* full-screen "choose city" page shown after tapping No on B1 — static Figma export */
+  .city-search-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    transform: translateX(100%);
+    pointer-events: none;
+    transition: transform 340ms var(--sheet-ease);
+    will-change: transform;
+  }
+  .city-search-screen.open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
+
+  .city-search-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+
+  .back-hotspot {
+    position: absolute;
+    left: 4.444%;
+    top: 2.5%;
+    width: 6.667%;
+    height: 3%;
+    border: none;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+  <div class="page-heading">CRF — Demand City Confirmation</div>
+
+  <div class="phone-frame">
+    <div class="screen">
+      <img class="bg" src="assets/srp.png" alt="City SRP background">
+      <button class="contact-trigger" id="contactTrigger" aria-label="Open confirm interest sheet"></button>
+
+      <div class="scrim" id="scrim">
+        <div class="bottomsheet" id="bottomsheet">
+
+          <div class="sheet-view" id="viewB1">
+            <div class="sheet-header">
+              <div class="sheet-title">Just to confirm</div>
+              <button class="close-btn" data-close aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M1 1L17 17M17 1L1 17" stroke="#0F0E0D" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="property-card">
+              <div class="property-thumb">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 10.5L12 3l9 7.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M5 9.5V20h14V9.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="property-info">
+                <div class="property-name">Evolvus Phase 1, Sikanderpur</div>
+                <div class="divider"></div>
+                <div class="price-row">
+                  <span class="price">₹2.5 Cr. - ₹4.53 Cr.</span>
+                  <span class="dot"></span>
+                  <span class="location">Gurgaon</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="question">Are you looking to buy in <span class="bold">Gurgaon</span>?</div>
+
+            <div class="button-row">
+              <button class="btn btn-secondary" id="noBtn">No, change city</button>
+              <button class="btn btn-primary" id="yesBtn">Yes</button>
+            </div>
+          </div>
+
+          <div class="sheet-view is-hidden" id="viewB2">
+            <div class="sheet-header">
+              <div class="sheet-title">Just to confirm</div>
+              <button class="close-btn" data-close aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M1 1L17 17M17 1L1 17" stroke="#0F0E0D" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="property-card">
+              <div class="property-thumb">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 10.5L12 3l9 7.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M5 9.5V20h14V9.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="property-info">
+                <div class="property-name">Evolvus Phase 1, Sikanderpur</div>
+                <div class="divider"></div>
+                <div class="price-row">
+                  <span class="price">₹2.5 Cr. - ₹4.53 Cr.</span>
+                  <span class="dot"></span>
+                  <span class="location">Gurgaon</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="qc-section">
+              <div class="qc-label">Does this budget work for you?</div>
+              <div class="radio-list" id="budgetRadioList">
+                <button class="radio-row" data-radio><span>Yes, this works</span><span class="radio-control"><span class="radio-dot"></span></span></button>
+                <button class="radio-row" data-radio><span>Looking under ₹2.5 Cr.</span><span class="radio-control"><span class="radio-dot"></span></span></button>
+                <button class="radio-row" data-radio><span>Can stretch up to ₹4.53 Cr.</span><span class="radio-control"><span class="radio-dot"></span></span></button>
+              </div>
+            </div>
+
+            <button class="btn btn-continue" id="continueBtnB2" disabled>Continue</button>
+          </div>
+
+          <div class="sheet-view is-hidden" id="viewB3">
+            <div class="sheet-header">
+              <div class="sheet-title">Just to confirm</div>
+              <button class="close-btn" data-close aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                  <path d="M1 1L17 17M17 1L1 17" stroke="#0F0E0D" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <div class="property-card">
+              <div class="property-thumb">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                  <path d="M3 10.5L12 3l9 7.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M5 9.5V20h14V9.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="property-info">
+                <div class="property-name">Evolvus Phase 1, Sikanderpur</div>
+                <div class="divider"></div>
+                <div class="price-row">
+                  <span class="price">₹2.5 Cr. - ₹4.53 Cr.</span>
+                  <span class="dot"></span>
+                  <span class="location">Gurgaon</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="qc-section">
+              <div class="locality-question">Open to nearby localities? (Optional)</div>
+              <div class="chip-row" id="localityChipRow">
+                <button class="chip" data-chip>Golf Course Road</button>
+                <button class="chip" data-chip>DLF Phase 2</button>
+                <button class="chip" data-chip>MG Road</button>
+                <button class="chip" data-chip>DLF Cyber Hub</button>
+                <button class="chip" data-chip>None of these</button>
+              </div>
+            </div>
+
+            <button class="btn btn-continue active" id="continueBtnB3">Continue</button>
+          </div>
+
+          <div class="sheet-view is-hidden" id="viewB4">
+            <button class="close-btn" data-close aria-label="Close" style="position:absolute; top:16px; right:16px; z-index:1;">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M1 1L17 17M17 1L1 17" stroke="#767676" stroke-width="1.6" stroke-linecap="round"/>
+              </svg>
+            </button>
+
+            <div class="login-banner"></div>
+            <div class="login-logo-badge">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                <rect x="2" y="2" width="20" height="20" rx="5" fill="#F2C94C"/>
+                <path d="M9 7l6 5-6 5" stroke="#4A16D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div class="login-heading">Connect with sellers instantly!</div>
+
+            <div class="phone-input-wrap">
+              <span class="country-code">+91</span>
+              <span class="phone-input-divider"></span>
+              <input class="phone-input" id="phoneInput" type="tel" inputmode="numeric" placeholder="Phone number" maxlength="10">
+            </div>
+
+            <button class="btn btn-login-primary" id="continueBtnB4">Continue</button>
+
+            <div class="or-divider"><span class="line"></span><span>OR</span><span class="line"></span></div>
+
+            <button class="btn btn-whatsapp" id="whatsappBtn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C6.48 2 2 6.48 2 12c0 1.85.5 3.58 1.36 5.07L2 22l5.06-1.33A9.94 9.94 0 0 0 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2z" fill="#25D366"/>
+                <path d="M8.9 7.7c.2-.4.4-.4.6-.4h.5c.16 0 .38-.06.58.44.2.5.7 1.7.76 1.83.06.13.1.28.02.45-.08.16-.12.27-.24.4-.12.14-.25.32-.36.43-.12.12-.24.25-.1.5.14.24.62 1 1.33 1.63.92.8 1.68 1.06 1.93 1.18.24.12.38.1.52-.06.14-.16.6-.7.76-.94.16-.24.32-.2.53-.12.22.08 1.38.65 1.62.77.24.12.4.18.46.28.06.1.06.58-.14 1.14-.2.56-1.16 1.08-1.6 1.14-.42.06-.86.24-2.88-.6-2.44-1-3.98-3.48-4.1-3.64-.12-.16-.98-1.3-.98-2.48 0-1.18.62-1.76.84-2z" fill="#fff"/>
+              </svg>
+              <span>WhatsApp me the details</span>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="toast" id="toast"></div>
+
+      <div class="city-search-screen" id="citySearchScreen">
+        <img class="city-search-img" src="assets/search-city.png" alt="Choose a city">
+        <button class="back-hotspot" id="backHotspot" aria-label="Back"></button>
+      </div>
+    </div>
+  </div>
+
+  <button class="replay-btn" id="replayBtn">Replay animation</button>
+
+<script>
+  const scrim = document.getElementById('scrim');
+  const bottomsheet = document.getElementById('bottomsheet');
+  const contactTrigger = document.getElementById('contactTrigger');
+  const closeBtns = document.querySelectorAll('[data-close]');
+  const viewB1 = document.getElementById('viewB1');
+  const viewB2 = document.getElementById('viewB2');
+  const viewB3 = document.getElementById('viewB3');
+  const yesBtn = document.getElementById('yesBtn');
+  const noBtn = document.getElementById('noBtn');
+  const toast = document.getElementById('toast');
+  const replayBtn = document.getElementById('replayBtn');
+  const viewB4 = document.getElementById('viewB4');
+  const radioRows = document.querySelectorAll('#budgetRadioList [data-radio]');
+  const continueBtnB2 = document.getElementById('continueBtnB2');
+  const continueBtnB3 = document.getElementById('continueBtnB3');
+  const continueBtnB4 = document.getElementById('continueBtnB4');
+  const whatsappBtn = document.getElementById('whatsappBtn');
+  const phoneInput = document.getElementById('phoneInput');
+  const chips = document.querySelectorAll('#localityChipRow [data-chip]');
+  const citySearchScreen = document.getElementById('citySearchScreen');
+  const backHotspot = document.getElementById('backHotspot');
+
+  let toastTimer;
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toast.classList.remove('show'), 1700);
+  }
+
+  function openSheet() {
+    scrim.classList.add('open');
+  }
+  function closeSheet() {
+    scrim.classList.remove('open');
+    // reset to the initial view once the slide-down finishes, so reopening starts fresh
+    setTimeout(() => {
+      bottomsheet.style.height = '';
+      viewB2.classList.add('is-hidden');
+      viewB3.classList.add('is-hidden');
+      viewB4.classList.add('is-hidden');
+      viewB1.classList.remove('is-hidden');
+      radioRows.forEach((row) => row.classList.remove('selected'));
+      continueBtnB2.classList.remove('active');
+      continueBtnB2.disabled = true;
+      chips.forEach((chip) => chip.classList.remove('selected'));
+      phoneInput.value = '';
+      citySearchScreen.classList.remove('open');
+    }, 340);
+  }
+
+  function switchView(fromView, toView) {
+    const startHeight = bottomsheet.getBoundingClientRect().height;
+    bottomsheet.style.height = startHeight + 'px';
+    void bottomsheet.offsetHeight; // reflow to commit the locked height
+
+    fromView.classList.add('is-hidden');
+    toView.classList.remove('is-hidden');
+    const endHeight = toView.scrollHeight;
+
+    requestAnimationFrame(() => {
+      bottomsheet.style.height = endHeight + 'px';
+    });
+  }
+
+  contactTrigger.addEventListener('click', openSheet);
+  closeBtns.forEach((btn) => btn.addEventListener('click', closeSheet));
+  scrim.addEventListener('click', (e) => {
+    if (e.target === scrim) closeSheet();
+  });
+
+  yesBtn.addEventListener('click', () => switchView(viewB1, viewB2));
+  noBtn.addEventListener('click', () => citySearchScreen.classList.add('open'));
+  backHotspot.addEventListener('click', () => {
+    citySearchScreen.classList.remove('open');
+    closeSheet();
+  });
+
+  radioRows.forEach((row) => {
+    row.addEventListener('click', () => {
+      radioRows.forEach((r) => r.classList.remove('selected'));
+      row.classList.add('selected');
+      continueBtnB2.disabled = false;
+      continueBtnB2.classList.add('active');
+    });
+  });
+
+  continueBtnB2.addEventListener('click', () => {
+    if (continueBtnB2.disabled) return;
+    switchView(viewB2, viewB3);
+  });
+
+  chips.forEach((chip) => {
+    chip.addEventListener('click', () => chip.classList.toggle('selected'));
+  });
+
+  continueBtnB3.addEventListener('click', () => switchView(viewB3, viewB4));
+
+  continueBtnB4.addEventListener('click', () => {
+    showToast('Continue tapped — next step to be prototyped');
+  });
+  whatsappBtn.addEventListener('click', () => {
+    showToast('WhatsApp me the details tapped — next step to be prototyped');
+  });
+
+  replayBtn.addEventListener('click', () => {
+    closeSheet();
+    setTimeout(openSheet, 400);
+  });
+</script>
+
+</body>
+</html>
