@@ -21,22 +21,26 @@
   html, body {
     margin: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    height: 100dvh;
     background: #000;
     font-family: "Google Sans Flex", sans-serif;
     overscroll-behavior: none;
+    overflow: hidden;
   }
 
   /* empty space at the top so the page doesn't load flush under the browser's search bar */
   body {
     padding-top: var(--top-gap);
+    display: flex;
+    flex-direction: column;
   }
 
   /* fills the rest of the viewport below the top gap, no fixed size or bounding chrome */
   .phone-frame {
     width: 100vw;
-    height: calc(100vh - var(--top-gap));
-    height: calc(100dvh - var(--top-gap));
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
     position: relative;
   }
