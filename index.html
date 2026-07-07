@@ -629,7 +629,7 @@
                 <button class="chip" data-chip>DLF Phase 2</button>
                 <button class="chip" data-chip>MG Road</button>
                 <button class="chip" data-chip>DLF Cyber Hub</button>
-                <button class="chip" data-chip>None of these</button>
+                <button class="chip" data-chip data-none>None of these</button>
               </div>
             </div>
 
@@ -776,8 +776,20 @@
     switchView(viewB2, viewB3);
   });
 
+  const noneChip = document.querySelector('#localityChipRow [data-none]');
   chips.forEach((chip) => {
-    chip.addEventListener('click', () => chip.classList.toggle('selected'));
+    chip.addEventListener('click', () => {
+      chip.classList.toggle('selected');
+      if (chip === noneChip) {
+        if (chip.classList.contains('selected')) {
+          chips.forEach((other) => {
+            if (other !== chip) other.classList.remove('selected');
+          });
+        }
+      } else if (chip.classList.contains('selected')) {
+        noneChip.classList.remove('selected');
+      }
+    });
   });
 
   continueBtnB3.addEventListener('click', () => switchView(viewB3, viewB4));
