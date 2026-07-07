@@ -494,17 +494,6 @@
     object-fit: cover;
     -webkit-user-drag: none;
     user-select: none;
-  }
-
-  .back-hotspot {
-    position: absolute;
-    left: 4.444%;
-    top: 2.5%;
-    width: 6.667%;
-    height: 3%;
-    border: none;
-    background: transparent;
-    padding: 0;
     cursor: pointer;
   }
 </style>
@@ -678,8 +667,7 @@
       <div class="toast" id="toast"></div>
 
       <div class="city-search-screen" id="citySearchScreen">
-        <img class="city-search-img" src="assets/search-city.png" alt="Choose a city">
-        <button class="back-hotspot" id="backHotspot" aria-label="Back"></button>
+        <img class="city-search-img" id="citySearchImg" src="assets/search-city.png" alt="Choose a city">
       </div>
     </div>
   </div>
@@ -704,7 +692,7 @@
   const phoneInput = document.getElementById('phoneInput');
   const chips = document.querySelectorAll('#localityChipRow [data-chip]');
   const citySearchScreen = document.getElementById('citySearchScreen');
-  const backHotspot = document.getElementById('backHotspot');
+  const citySearchImg = document.getElementById('citySearchImg');
 
   let toastTimer;
   function showToast(msg) {
@@ -757,7 +745,7 @@
 
   yesBtn.addEventListener('click', () => switchView(viewB1, viewB2));
   noBtn.addEventListener('click', () => citySearchScreen.classList.add('open'));
-  backHotspot.addEventListener('click', () => {
+  citySearchImg.addEventListener('click', () => {
     citySearchScreen.classList.remove('open');
     closeSheet();
   });
