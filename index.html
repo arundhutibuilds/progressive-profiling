@@ -2,22 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Progressive Profiling</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#4A16D9">
-
-<!-- iOS: run full-screen when added to the home screen -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Progressive Profiling">
-<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
-
-<!-- Android/Chrome -->
-<meta name="mobile-web-app-capable" content="yes">
-
-<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
 
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:wght@400;500&display=swap">
@@ -27,6 +13,7 @@
     --sheet-ease: cubic-bezier(0.32, 0.72, 0, 1);
     --overlay-duration: 260ms;
     --brand: #4A16D9;
+    --top-gap: 40px;
   }
 
   * { box-sizing: border-box; }
@@ -40,11 +27,16 @@
     overscroll-behavior: none;
   }
 
-  /* fills the actual device viewport exactly, no fixed size or bounding chrome */
+  /* empty space at the top so the page doesn't load flush under the browser's search bar */
+  body {
+    padding-top: var(--top-gap);
+  }
+
+  /* fills the rest of the viewport below the top gap, no fixed size or bounding chrome */
   .phone-frame {
     width: 100vw;
-    height: 100vh;
-    height: 100dvh;
+    height: calc(100vh - var(--top-gap));
+    height: calc(100dvh - var(--top-gap));
     overflow: hidden;
     position: relative;
   }
