@@ -506,6 +506,26 @@
     text-align: center;
     max-width: 260px;
   }
+
+  /* full-page static image shown after L1's loading spinner — Figma Frame 25, filtered SRP result */
+  .frame25-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 55;
+    display: none;
+  }
+  .frame25-screen.open {
+    display: block;
+  }
+
+  .frame25-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
 </style>
 </head>
 <body>
@@ -627,6 +647,10 @@
         <div class="loading-spinner"></div>
         <div class="loading-caption">Pulling up properties that match your budget better.</div>
       </div>
+
+      <div class="frame25-screen" id="frame25Screen">
+        <img class="frame25-img" src="assets/frame25.jpg" alt="Filtered search results">
+      </div>
     </div>
   </div>
 
@@ -649,6 +673,8 @@
   const citySearchScreen = document.getElementById('citySearchScreen');
   const citySearchImg = document.getElementById('citySearchImg');
   const loadingScreen = document.getElementById('loadingScreen');
+  const frame25Screen = document.getElementById('frame25Screen');
+  let loadingTimer;
 
   let toastTimer;
   function showToast(msg) {
@@ -674,7 +700,9 @@
       continueBtnB2.disabled = true;
       phoneInput.value = '';
       citySearchScreen.classList.remove('open');
+      clearTimeout(loadingTimer);
       loadingScreen.classList.remove('open');
+      frame25Screen.classList.remove('open');
     }, 340);
   }
 
@@ -718,6 +746,11 @@
     if (continueBtnB2.disabled) return;
     if (radioRows[0].classList.contains('selected')) {
       loadingScreen.classList.add('open');
+      clearTimeout(loadingTimer);
+      loadingTimer = setTimeout(() => {
+        loadingScreen.classList.remove('open');
+        frame25Screen.classList.add('open');
+      }, 3000);
     } else {
       switchView(viewB2, viewB4);
     }
