@@ -120,7 +120,7 @@
     padding: 16px;
     background: #FAF9F5;
     border: 1px solid #EDEBDF;
-    border-radius: 16px;
+    border-radius: 12px;
     align-items: stretch;
   }
 
@@ -148,48 +148,19 @@
     font-size: 16px;
     font-weight: 500;
     line-height: 22px;
-    color: #222222;
+    color: #0F0E0D;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .divider {
-    height: 1px;
-    background: #EDEBDF;
-    width: 100%;
-  }
-
-  .price-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    line-height: 20px;
-    color: #656565;
-    white-space: nowrap;
-    overflow: hidden;
-  }
-
-  .price-row .dot {
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: #656565;
-    flex: none;
-  }
-
-  .price-row .location { overflow: hidden; text-overflow: ellipsis; }
-
-  .question {
-    margin-top: 16px;
+  .property-price {
     font-size: 14px;
     line-height: 20px;
     color: #666666;
-  }
-  .question .bold {
-    font-weight: 500;
-    color: #0F0E0D;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .button-row {
@@ -283,16 +254,11 @@
   }
   .btn-continue.active:hover { opacity: 0.92; }
 
-  .qc-section { margin-top: 24px; }
-
-  .qc-label {
-    font-size: 14px;
-    line-height: 20px;
-    color: #666666;
-    margin-bottom: 12px;
+  .radio-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
   }
-
-  .radio-list { display: flex; flex-direction: column; }
 
   .radio-row {
     display: flex;
@@ -327,16 +293,17 @@
   }
 
   .radio-dot {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     border-radius: 50%;
-    background: var(--brand);
+    background: #5E23DC;
     transform: scale(0);
     transition: transform 120ms ease;
   }
 
   .radio-row.selected .radio-control {
     border-color: var(--brand);
+    background: #F1EBFF;
   }
   .radio-row.selected .radio-dot {
     transform: scale(1);
@@ -544,7 +511,7 @@
 
           <div class="sheet-view is-hidden" id="viewB2">
             <div class="sheet-header">
-              <div class="sheet-title">Just to confirm</div>
+              <div class="sheet-title">Let's confirm your budget</div>
               <button class="close-btn" data-close aria-label="Close">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
                   <path d="M1 1L17 17M17 1L1 17" stroke="#0F0E0D" stroke-width="1.6" stroke-linecap="round"/>
@@ -561,22 +528,14 @@
               </div>
               <div class="property-info">
                 <div class="property-name">Evolvus Phase 1, Sikanderpur</div>
-                <div class="divider"></div>
-                <div class="price-row">
-                  <span class="price">₹2.5 Cr. - ₹4.53 Cr.</span>
-                  <span class="dot"></span>
-                  <span class="location">Gurgaon</span>
-                </div>
+                <div class="property-price">₹2.5 Cr. - ₹4.53 Cr.</div>
               </div>
             </div>
 
-            <div class="qc-section">
-              <div class="qc-label">Does this budget work for you?</div>
-              <div class="radio-list" id="budgetRadioList">
-                <button class="radio-row" data-radio><span>Yes, this works</span><span class="radio-control"><span class="radio-dot"></span></span></button>
-                <button class="radio-row" data-radio><span>Looking under ₹2.5 Cr.</span><span class="radio-control"><span class="radio-dot"></span></span></button>
-                <button class="radio-row" data-radio><span>Can go beyond ₹4.53 Cr.</span><span class="radio-control"><span class="radio-dot"></span></span></button>
-              </div>
+            <div class="radio-list" id="budgetRadioList">
+              <button class="radio-row" data-radio><span>Looking under ₹2 Cr.</span><span class="radio-control"><span class="radio-dot"></span></span></button>
+              <button class="radio-row" data-radio><span>Between ₹2 Cr. - ₹5 Cr.</span><span class="radio-control"><span class="radio-dot"></span></span></button>
+              <button class="radio-row" data-radio><span>Can go beyond ₹5 Cr.</span><span class="radio-control"><span class="radio-dot"></span></span></button>
             </div>
 
             <button class="btn btn-continue" id="continueBtnB2" disabled>Continue</button>
