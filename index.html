@@ -193,9 +193,47 @@
   }
 
   .button-row {
-    margin-top: 12px;
+    margin-top: 16px;
     display: flex;
     gap: 8px;
+  }
+
+  .location-row {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .location-thumb {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #E9DDC8;
+    border: 1px solid #F0ECE3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .location-name {
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 500;
+    color: #222222;
+  }
+
+  .location-sub {
+    font-size: 12px;
+    line-height: 16px;
+    color: #727272;
   }
 
   .btn {
@@ -509,33 +547,26 @@
 
           <div class="sheet-view" id="viewB1">
             <div class="sheet-header">
-              <div class="sheet-title">Just to confirm</div>
+              <div class="sheet-title">Are you searching in this city?</div>
               <button class="close-btn" data-close aria-label="Close">
                 <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M1 1L17 17M17 1L1 17" stroke="#0F0E0D" stroke-width="1.6" stroke-linecap="round"/>
+                  <path d="M1 1L17 17M17 1L1 17" stroke="#7D7D7D" stroke-width="1.5" stroke-linecap="round"/>
                 </svg>
               </button>
             </div>
 
-            <div class="property-card">
-              <div class="property-thumb">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M3 10.5L12 3l9 7.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M5 9.5V20h14V9.5" stroke="#B9B7AC" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <div class="location-row">
+              <div class="location-thumb">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M10 18s6-5.686 6-10a6 6 0 10-12 0c0 4.314 6 10 6 10z" fill="#F20062"/>
+                  <circle cx="10" cy="8" r="2.2" fill="#FFFFFF"/>
                 </svg>
               </div>
-              <div class="property-info">
-                <div class="property-name">Evolvus Phase 1, Sikanderpur</div>
-                <div class="divider"></div>
-                <div class="price-row">
-                  <span class="price">₹2.5 Cr. - ₹4.53 Cr.</span>
-                  <span class="dot"></span>
-                  <span class="location">Gurgaon</span>
-                </div>
+              <div class="location-info">
+                <div class="location-name">Gurgaon</div>
+                <div class="location-sub">DLF City Phase 4</div>
               </div>
             </div>
-
-            <div class="question">Are you looking to buy in <span class="bold">Gurgaon</span>?</div>
 
             <div class="button-row">
               <button class="btn btn-secondary" id="noBtn">No, change city</button>
