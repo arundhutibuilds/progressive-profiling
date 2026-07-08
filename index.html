@@ -469,6 +469,63 @@
     user-select: none;
     cursor: pointer;
   }
+
+  /* loading transition shown after Continue on B2 when "Looking under ₹2 Cr." is selected — Figma Frame 23 */
+  .loading-screen {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0, 0, 0, 0.4);
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .loading-screen.open {
+    display: flex;
+  }
+
+  .loading-card {
+    width: 88%;
+    max-width: 342px;
+    background: #FFFFFF;
+    border-radius: 12px;
+    padding: 20px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    overflow: hidden;
+  }
+
+  .loading-dot-stage {
+    width: 150px;
+    height: 150px;
+    max-width: 100%;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .loading-dot {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #5E23DC;
+    animation: loadingDotBounce 800ms infinite;
+  }
+
+  @keyframes loadingDotBounce {
+    0%   { transform: translateY(0); animation-timing-function: cubic-bezier(0.5, 0, 1, 1); }
+    50%  { transform: translateY(-100px); animation-timing-function: cubic-bezier(0, 0, 0.5, 1); }
+    100% { transform: translateY(0); }
+  }
+
+  .loading-caption {
+    font-size: 14px;
+    line-height: 20px;
+    color: #666666;
+    text-align: center;
+  }
 </style>
 </head>
 <body>
@@ -585,6 +642,15 @@
       <div class="city-search-screen" id="citySearchScreen">
         <img class="city-search-img" id="citySearchImg" src="assets/search-city.png" alt="Choose a city">
       </div>
+
+      <div class="loading-screen" id="loadingScreen">
+        <div class="loading-card">
+          <div class="loading-dot-stage">
+            <div class="loading-dot"></div>
+          </div>
+          <div class="loading-caption">Pulling up properties that match your budget better.</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -606,6 +672,7 @@
   const phoneInput = document.getElementById('phoneInput');
   const citySearchScreen = document.getElementById('citySearchScreen');
   const citySearchImg = document.getElementById('citySearchImg');
+  const loadingScreen = document.getElementById('loadingScreen');
 
   let toastTimer;
   function showToast(msg) {
@@ -631,6 +698,7 @@
       continueBtnB2.disabled = true;
       phoneInput.value = '';
       citySearchScreen.classList.remove('open');
+      loadingScreen.classList.remove('open');
     }, 340);
   }
 
@@ -672,7 +740,11 @@
 
   continueBtnB2.addEventListener('click', () => {
     if (continueBtnB2.disabled) return;
-    switchView(viewB2, viewB4);
+    if (radioRows[0].classList.contains('selected')) {
+      loadingScreen.classList.add('open');
+    } else {
+      switchView(viewB2, viewB4);
+    }
   });
 
   continueBtnB4.addEventListener('click', () => {
