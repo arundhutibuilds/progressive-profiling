@@ -475,49 +475,28 @@
     position: absolute;
     inset: 0;
     z-index: 50;
-    background: rgba(0, 0, 0, 0.4);
+    background: #FFFFFF;
     display: none;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 16px;
   }
   .loading-screen.open {
     display: flex;
   }
 
-  .loading-card {
-    width: 88%;
-    max-width: 342px;
-    background: #FFFFFF;
-    border-radius: 12px;
-    padding: 20px 32px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 16px;
-    overflow: hidden;
-  }
-
-  .loading-dot-stage {
-    width: 150px;
-    height: 150px;
-    max-width: 100%;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .loading-dot {
-    width: 26px;
-    height: 26px;
+  .loading-spinner {
+    width: 36px;
+    height: 36px;
+    border: 4px solid #EDEBDF;
+    border-top-color: #5E23DC;
     border-radius: 50%;
-    background: #5E23DC;
-    animation: loadingDotBounce 800ms infinite;
+    animation: loadingSpin 800ms linear infinite;
   }
 
-  @keyframes loadingDotBounce {
-    0%   { transform: translateY(0); animation-timing-function: cubic-bezier(0.5, 0, 1, 1); }
-    50%  { transform: translateY(-100px); animation-timing-function: cubic-bezier(0, 0, 0.5, 1); }
-    100% { transform: translateY(0); }
+  @keyframes loadingSpin {
+    to { transform: rotate(360deg); }
   }
 
   .loading-caption {
@@ -525,6 +504,7 @@
     line-height: 20px;
     color: #666666;
     text-align: center;
+    max-width: 260px;
   }
 </style>
 </head>
@@ -644,12 +624,8 @@
       </div>
 
       <div class="loading-screen" id="loadingScreen">
-        <div class="loading-card">
-          <div class="loading-dot-stage">
-            <div class="loading-dot"></div>
-          </div>
-          <div class="loading-caption">Pulling up properties that match your budget better.</div>
-        </div>
+        <div class="loading-spinner"></div>
+        <div class="loading-caption">Pulling up properties that match your budget better.</div>
       </div>
     </div>
   </div>
